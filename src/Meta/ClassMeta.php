@@ -23,12 +23,14 @@ namespace Bonefish\Reflection\Meta;
 
 
 use Bonefish\Reflection\Traits\AnnotatedDocCommentTrait;
+use Bonefish\Reflection\Traits\HasDeclaringClassTrait;
 use Bonefish\Reflection\Traits\NameableTrait;
 
 class ClassMeta
 {
     use AnnotatedDocCommentTrait;
     use NameableTrait;
+    use HasDeclaringClassTrait;
 
     /**
      * @var PropertyMeta[]

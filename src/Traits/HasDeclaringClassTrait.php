@@ -28,7 +28,7 @@ trait HasDeclaringClassTrait
     /**
      * @var ClassMeta
      */
-    protected $declaringClass;
+    protected $declaringClass = NULL;
 
     /**
      * @return ClassMeta

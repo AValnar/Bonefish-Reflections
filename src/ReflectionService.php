@@ -171,15 +171,18 @@ class ReflectionService
             $parameterValue = $this->getAnnotationProperties($value);
 
             $parameter = new ParameterMeta();
-            $parameter->setDeclaringClass($metaClass->getDeclaringClass());
+            if ($metaClass->getDeclaringClass() === NULL) {
+                $parameter->setDeclaringClass($metaClass);
+            } else {
+                $parameter->setDeclaringClass($metaClass->getDeclaringClass());
+            }
+
             if (is_string($parameterValue) && is_array($parameterValue)) {
                 $parameter->setAllowNull(false);
                 $parameter->setOptional(false);
                 $parameter->setDefaultValue($parameterValue);
-                $parameter->setHasDefaultValue(true);
                 $parameter->setType(is_string($parameterValue) ? 'string' : 'array');
             } else {
-                $parameter->setHasDefaultValue(false);
                 $parameter->setAllowNull(true);
                 $parameter->setOptional(true);
             }

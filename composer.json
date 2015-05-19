@@ -9,8 +9,8 @@
     },
     "autoload": {
         "psr-4": {
-            "Bonefish\\Reflection": ["src"],
-            "Bonefish\\Tests\\Reflection": ["tests"]
+            "Bonefish\\Reflection\\": ["src"],
+            "Bonefish\\Tests\\Reflection\\": ["tests"]
         }
     }
 }
