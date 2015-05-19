@@ -1,0 +1,16 @@
+{
+    "name": "av/bonefish-reflections",
+    "description": "Bonefish Reflection Service",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "nette/reflection": "2.3.*",
+        "doctrine/cache": "1.4.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Bonefish\\Reflection": ["src"],
+            "Bonefish\\Tests\\Reflection": ["tests"]
+        }
+    }
+}
