@@ -194,7 +194,7 @@ class ReflectionService
                 $parameter->setDeclaringClass($metaClass->getDeclaringClass());
             }
 
-            if (is_string($parameterValue) && is_array($parameterValue)) {
+            if (is_string($parameterValue) || is_array($parameterValue)) {
                 $parameter->setAllowNull(false);
                 $parameter->setOptional(false);
                 $parameter->setDefaultValue($parameterValue);
