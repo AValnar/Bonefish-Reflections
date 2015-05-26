@@ -29,7 +29,6 @@ use Bonefish\Reflection\Meta\MethodMeta;
 use Bonefish\Reflection\Meta\ParameterMeta;
 use Bonefish\Reflection\Meta\PropertyMeta;
 use Bonefish\Reflection\Meta\UseMeta;
-use Bonefish\Reflection\Traits\AnnotatedDocCommentTrait;
 use Doctrine\Common\Cache\Cache;
 use Nette\Reflection\AnnotationsParser;
 use Nette\Reflection\ClassType;
@@ -54,6 +53,14 @@ class ReflectionService
     const CACHE_PREFIX = 'bonefish.reflection.meta.';
 
     /**
+     * @param Cache $cache
+     */
+    public function __construct(Cache $cache = null)
+    {
+        $this->cache = $cache;
+    }
+
+    /**
      * @return Cache
      */
     public function getCache()
@@ -68,7 +75,17 @@ class ReflectionService
     public function setCache($cache)
     {
         $this->cache = $cache;
+
         return $this;
+    }
+
+    /**
+     * @param string $className
+     * @return string
+     */
+    protected function getCacheKey($className)
+    {
+        return self::CACHE_PREFIX . str_replace('\\', '.', $className);
     }
 
     /**
@@ -171,7 +188,7 @@ class ReflectionService
             $parameterValue = $this->getAnnotationProperties($value);
 
             $parameter = new ParameterMeta();
-            if ($metaClass->getDeclaringClass() === NULL) {
+            if ($metaClass->getDeclaringClass() === null) {
                 $parameter->setDeclaringClass($metaClass);
             } else {
                 $parameter->setDeclaringClass($metaClass->getDeclaringClass());
@@ -194,11 +211,6 @@ class ReflectionService
             }
             $metaClass->addAnnotation($annotationMeta);
         }
-    }
-
-    protected function getCacheKey($className)
-    {
-        return self::CACHE_PREFIX . str_replace('\\', '.', $className);
     }
 
     /**
