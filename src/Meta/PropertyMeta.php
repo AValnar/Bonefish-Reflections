@@ -23,7 +23,7 @@ namespace Bonefish\Reflection\Meta;
 
 
 use Bonefish\Reflection\Traits\AnnotatedDocCommentTrait;
-use Bonefish\Reflection\Traits\HasDeclaringClassTrait;
+use Bonefish\Reflection\Traits\DeclaringClassTrait;
 use Bonefish\Reflection\Traits\NameableTrait;
 use Bonefish\Reflection\Traits\VisibilityTrait;
 
@@ -31,6 +31,6 @@ class PropertyMeta
 {
     use AnnotatedDocCommentTrait;
     use VisibilityTrait;
-    use HasDeclaringClassTrait;
+    use DeclaringClassTrait;
     use NameableTrait;
 } 

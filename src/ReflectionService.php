@@ -29,12 +29,15 @@ use Bonefish\Reflection\Meta\MethodMeta;
 use Bonefish\Reflection\Meta\ParameterMeta;
 use Bonefish\Reflection\Meta\PropertyMeta;
 use Bonefish\Reflection\Meta\UseMeta;
+use Bonefish\Traits\DoctrineCacheTrait;
 use Doctrine\Common\Cache\Cache;
 use Nette\Reflection\AnnotationsParser;
 use Nette\Reflection\ClassType;
 
 class ReflectionService
 {
+    use DoctrineCacheTrait;
+
     /**
      * @var array
      */
@@ -46,11 +49,9 @@ class ReflectionService
     protected $metaReflections = [];
 
     /**
-     * @var Cache
+     * @var string
      */
-    protected $cache = null;
-
-    const CACHE_PREFIX = 'bonefish.reflection.meta.';
+    protected $cachePrefix = 'bonefish.reflection.meta';
 
     /**
      * @param Cache $cache
@@ -58,34 +59,6 @@ class ReflectionService
     public function __construct(Cache $cache = null)
     {
         $this->cache = $cache;
-    }
-
-    /**
-     * @return Cache
-     */
-    public function getCache()
-    {
-        return $this->cache;
-    }
-
-    /**
-     * @param Cache $cache
-     * @return self
-     */
-    public function setCache($cache)
-    {
-        $this->cache = $cache;
-
-        return $this;
-    }
-
-    /**
-     * @param string $className
-     * @return string
-     */
-    protected function getCacheKey($className)
-    {
-        return self::CACHE_PREFIX . str_replace('\\', '.', $className);
     }
 
     /**

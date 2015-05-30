@@ -23,7 +23,7 @@ namespace Bonefish\Reflection\Traits;
 
 use Bonefish\Reflection\Meta\ClassMeta;
 
-trait HasDeclaringClassTrait
+trait DeclaringClassTrait
 {
     /**
      * @var ClassMeta
