@@ -49,16 +49,12 @@ class ReflectionService
     protected $metaReflections = [];
 
     /**
-     * @var string
-     */
-    protected $cachePrefix = 'bonefish.reflection.meta';
-
-    /**
      * @param Cache $cache
      */
     public function __construct(Cache $cache = null)
     {
         $this->cache = $cache;
+        $this->setCachePrefix('bonefish.reflection.meta');
     }
 
     /**
