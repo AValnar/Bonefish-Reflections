@@ -103,10 +103,17 @@ class ReflectionService
         $reflection = $this->getClassReflection($className);
 
         $classMeta->setName($className);
+        $classMeta->setShortName($reflection->getShortName());
         $classMeta->setInterface($reflection->isInterface());
         $classMeta->setDocComment($reflection->getDocComment());
         $inNamespace = $reflection->inNamespace();
         $classMeta->setNamespaced($inNamespace);
+        $parentClass = $reflection->getParentClass() === null ? null : $this->getClassMetaReflection($reflection->getParentClass()->getName());
+        $classMeta->setParentClass($parentClass);
+
+        foreach($reflection->getInterfaceNames() as $interface) {
+            $classMeta->addInterface($this->getClassMetaReflection($interface));
+        }
 
         if ($inNamespace) {
             $classMeta->setNamespace($reflection->getNamespaceName());
@@ -188,6 +195,8 @@ class ReflectionService
      */
     protected function createUseMeta(ClassType $reflection, ClassMeta $classMeta)
     {
+        if (!$reflection->getFileName()) return;
+
         $parsedPHP = AnnotationsParser::parsePhp(file_get_contents($reflection->getFileName()));
 
         if (!isset($parsedPHP[$reflection->getName()]['use'])) {
@@ -238,10 +247,11 @@ class ReflectionService
     {
         foreach ($reflection->getMethods() as $methodReflection) {
             $method = new MethodMeta();
-            $method->setName($reflection->getName());
+            $method->setName($methodReflection->getName());
             $method->setPublic($methodReflection->isPublic());
             $method->setPrivate($methodReflection->isPrivate());
             $method->setProtected($methodReflection->isProtected());
+            $method->setDocComment($methodReflection->getDocComment());
 
             // Set declaring class and first check against the current to avoid a recursion hell
             if ($methodReflection->getDeclaringClass()->getName() !== $classMeta->getName()) {
@@ -280,6 +290,7 @@ class ReflectionService
             } else {
                 $parameter->setType('mixed');
             }
+
 
             $metaClass->addParameter($parameter);
         }

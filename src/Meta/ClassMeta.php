@@ -63,6 +63,98 @@ class ClassMeta
     protected $namespaced;
 
     /**
+     * @var ClassMeta
+     */
+    protected $parentClass;
+
+    /**
+     * @var ClassMeta[]
+     */
+    protected $interfaces = [];
+
+    /**
+     * @var string
+     */
+    protected $shortName;
+
+    /**
+     * @return string
+     */
+    public function getShortName()
+    {
+        return $this->shortName;
+    }
+
+    /**
+     * @param string $shortName
+     * @return self
+     */
+    public function setShortName($shortName)
+    {
+        $this->shortName = $shortName;
+
+        return $this;
+    }
+
+    /**
+     * @return ClassMeta
+     */
+    public function getParentClass()
+    {
+        return $this->parentClass;
+    }
+
+    /**
+     * @param ClassMeta $parentClass
+     * @return self
+     */
+    public function setParentClass($parentClass)
+    {
+        $this->parentClass = $parentClass;
+
+        return $this;
+    }
+
+    /**
+     * @param string $interface
+     * @return bool
+     */
+    public function implementsInterface($interface)
+    {
+        return isset($this->interfaces[$interface]);
+    }
+
+    /**
+     * @return ClassMeta[]
+     */
+    public function getInterfaces()
+    {
+        return $this->interfaces;
+    }
+
+    /**
+     * @param ClassMeta[] $interfaces
+     * @return self
+     */
+    public function setInterfaces($interfaces)
+    {
+        $this->interfaces = $interfaces;
+
+        return $this;
+    }
+
+    /**
+     * @param ClassMeta $interface
+     * @return self
+     */
+    public function addInterface($interface)
+    {
+        $this->interfaces[$interface->getName()] = $interface;
+
+        return $this;
+    }
+
+    /**
      * @return boolean
      */
     public function isNamespaced()

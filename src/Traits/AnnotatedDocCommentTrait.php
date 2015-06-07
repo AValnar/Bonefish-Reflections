@@ -31,6 +31,11 @@ trait AnnotatedDocCommentTrait
     protected $docComment;
 
     /**
+     * @var string
+     */
+    protected $description;
+
+    /**
      * @var AnnotationMeta[]
      */
     protected $annotations  = [];
@@ -75,6 +80,14 @@ trait AnnotatedDocCommentTrait
     /**
      * @return string
      */
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    /**
+     * @return string
+     */
     public function getDocComment()
     {
         return $this->docComment;
@@ -86,6 +99,13 @@ trait AnnotatedDocCommentTrait
      */
     public function setDocComment($docComment)
     {
+        $description = preg_replace('#^\s*\*\s?#ms', '', trim($docComment, '/*'));
+        $description = preg_split('#^\s*(?=@[_a-zA-Z\x7F-\xFF][_a-zA-Z0-9\x7F-\xFF-\\\]*)#m', $description, 2);
+
+        if (isset($description[0])) {
+            $this->description = $description[0];
+        }
+
         $this->docComment = $docComment;
         return $this;
     }
