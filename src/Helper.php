@@ -22,6 +22,7 @@ namespace Bonefish\Reflection;
  * @version    1.0
  * @date       2014-09-21
  * @package Bonefish\Reflection
+ * @deprecated
  */
 class Helper
 {

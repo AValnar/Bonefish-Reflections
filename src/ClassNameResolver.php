@@ -24,7 +24,7 @@ namespace Bonefish\Reflection;
 
 use Bonefish\Reflection\Meta\ClassMeta;
 
-class ClassNameResolver
+final class ClassNameResolver
 {
     /**
      * @var ReflectionService
