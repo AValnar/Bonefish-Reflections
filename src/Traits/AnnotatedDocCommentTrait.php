@@ -21,8 +21,6 @@
 
 namespace Bonefish\Reflection\Traits;
 
-use Bonefish\Reflection\Meta\AnnotationMeta;
-
 trait AnnotatedDocCommentTrait
 {
     /**
@@ -36,12 +34,12 @@ trait AnnotatedDocCommentTrait
     protected $description;
 
     /**
-     * @var AnnotationMeta[]
+     * @var array
      */
     protected $annotations  = [];
 
     /**
-     * @return \Bonefish\Reflection\Meta\AnnotationMeta[]
+     * @return array
      */
     public function getAnnotations()
     {
@@ -50,7 +48,7 @@ trait AnnotatedDocCommentTrait
 
     /**
      * @param string $name
-     * @return AnnotationMeta|bool
+     * @return object|bool
      */
     public function getAnnotation($name)
     {
@@ -58,7 +56,7 @@ trait AnnotatedDocCommentTrait
     }
 
     /**
-     * @param \Bonefish\Reflection\Meta\AnnotationMeta[] $annotations
+     * @param array $annotations
      * @return self
      */
     public function setAnnotations($annotations)
@@ -68,12 +66,12 @@ trait AnnotatedDocCommentTrait
     }
 
     /**
-     * @param \Bonefish\Reflection\Meta\AnnotationMeta $annotation
+     * @param object $annotation
      * @return self
      */
-    public function addAnnotation(AnnotationMeta $annotation)
+    public function addAnnotation($annotation)
     {
-        $this->annotations[$annotation->getName()] = $annotation;
+        $this->annotations[get_class($annotation)] = $annotation;
         return $this;
     }
 

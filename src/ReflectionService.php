@@ -22,21 +22,21 @@
 namespace Bonefish\Reflection;
 
 
-use Bonefish\Reflection\Meta\AnnotationMeta;
-use Bonefish\Reflection\Meta\Annotations\VarAnnotationMeta;
+use Bonefish\Reflection\Annotations\Variable;
 use Bonefish\Reflection\Meta\ClassMeta;
 use Bonefish\Reflection\Meta\MethodMeta;
 use Bonefish\Reflection\Meta\ParameterMeta;
 use Bonefish\Reflection\Meta\PropertyMeta;
 use Bonefish\Reflection\Meta\UseMeta;
-use Bonefish\Traits\DoctrineCacheTrait;
+use Bonefish\Traits\CacheHelperTrait;
+use Doctrine\Common\Annotations\Reader;
 use Doctrine\Common\Cache\Cache;
 use Nette\Reflection\AnnotationsParser;
 use Nette\Reflection\ClassType;
 
 class ReflectionService
 {
-    use DoctrineCacheTrait;
+    use CacheHelperTrait;
 
     /**
      * @var array
@@ -49,11 +49,23 @@ class ReflectionService
     protected $metaReflections = [];
 
     /**
-     * @param Cache $cache
+     * @var Cache
      */
-    public function __construct(Cache $cache = null)
+    protected $cache;
+
+    /**
+     * @var Reader
+     */
+    protected $annotationReader;
+
+    /**
+     * @param Cache $cache
+     * @param Reader $annotationReader
+     */
+    public function __construct(Cache $cache, Reader $annotationReader)
     {
         $this->cache = $cache;
+        $this->annotationReader = $annotationReader;
         $this->setCachePrefix('bonefish.reflection.meta');
     }
 
@@ -89,13 +101,11 @@ class ReflectionService
      */
     protected function buildClassMetaReflection($className)
     {
-        if ($this->cache !== null) {
-            $cacheKey = $this->getCacheKey($className);
-            $hit = $this->cache->fetch($cacheKey);
+        $cacheKey = $this->getCacheKey($className);
+        $hit = $this->cache->fetch($cacheKey);
 
-            if ($hit !== false) {
-                return $hit;
-            }
+        if ($hit !== false) {
+            return $hit;
         }
 
         $classMeta = new ClassMeta();
@@ -119,73 +129,26 @@ class ReflectionService
             $classMeta->setNamespace($reflection->getNamespaceName());
         }
 
+        $annotations = $this->annotationReader->getClassAnnotations($reflection);
+        $this->createAnnotationMeta($classMeta, $annotations);
+
         $this->createUseMeta($reflection, $classMeta);
-        $this->createAnnotationMeta($reflection->getAnnotations(), $classMeta);
         $this->createPropertyMeta($reflection, $classMeta);
         $this->createMethodMeta($reflection, $classMeta);
 
-        if ($this->cache !== null) {
-            $this->cache->save($cacheKey, $classMeta);
-        }
+        $this->cache->save($cacheKey, $classMeta);
 
         return $classMeta;
     }
 
     /**
-     * @param array $value
-     * @return null|string|array
-     */
-    protected function getAnnotationProperties(array $value)
-    {
-        $value = $value[0];
-        $parameter = null;
-
-        if (is_string($value)) {
-            $parameter = $value;
-        } elseif (is_object($value) && $value instanceof \ArrayAccess) {
-            foreach ($value as $key => $val) {
-                $parameter[$key] = $val;
-            }
-        }
-
-        return $parameter;
-    }
-
-    /**
      * @param array $annotations
-     * @param ClassMeta|PropertyMeta|MethodMeta $metaClass
+     * @param ClassMeta|MethodMeta|PropertyMeta $metaClass
      */
-    protected function createAnnotationMeta(array $annotations, $metaClass)
+    protected function createAnnotationMeta($metaClass, ...$annotations)
     {
-        foreach ($annotations as $annotation => $value) {
-            $annotationMeta = $annotation === 'var' ? new VarAnnotationMeta() : new AnnotationMeta();
-            $annotationMeta->setName($annotation);
-
-            $parameterValue = $this->getAnnotationProperties($value);
-
-            $parameter = new ParameterMeta();
-            if ($metaClass->getDeclaringClass() === null) {
-                $parameter->setDeclaringClass($metaClass);
-            } else {
-                $parameter->setDeclaringClass($metaClass->getDeclaringClass());
-            }
-
-            if (is_string($parameterValue) || is_array($parameterValue)) {
-                $parameter->setAllowNull(false);
-                $parameter->setOptional(false);
-                $parameter->setDefaultValue($parameterValue);
-                $parameter->setType(is_string($parameterValue) ? 'string' : 'array');
-            } else {
-                $parameter->setAllowNull(true);
-                $parameter->setOptional(true);
-            }
-
-            $annotationMeta->setParameter($parameter);
-
-            if ($annotation === 'var') {
-                $this->setClassNameForVarAnnotation($metaClass, $parameterValue, $annotationMeta);
-            }
-            $metaClass->addAnnotation($annotationMeta);
+        foreach ($annotations as $annotation) {
+            $metaClass->addAnnotation($annotation);
         }
     }
 
@@ -234,7 +197,14 @@ class ReflectionService
                 $property->setDeclaringClass($classMeta);
             }
 
-            $this->createAnnotationMeta($propertyReflection->getAnnotations(), $property);
+            $annotations = $this->annotationReader->getPropertyAnnotations($propertyReflection);
+
+            if ($varAnnotation = $propertyReflection->getAnnotation('var'))
+            {
+                $annotations[] = new Variable($this->getClassNameForVarAnnotation($property, $varAnnotation));
+            }
+
+            $this->createAnnotationMeta($property, $annotations);
             $classMeta->addProperty($property);
         }
     }
@@ -262,7 +232,9 @@ class ReflectionService
 
             $this->createParameterMeta($methodReflection->getParameters(), $method);
 
-            $this->createAnnotationMeta($methodReflection->getAnnotations(), $method);
+            $annotations = $this->annotationReader->getMethodAnnotations($methodReflection);
+            $this->createAnnotationMeta($method, $annotations);
+
             $classMeta->addMethod($method);
         }
     }
@@ -298,19 +270,18 @@ class ReflectionService
 
     /**
      * @param PropertyMeta $metaClass
-     * @param string $parameter
-     * @param VarAnnotationMeta $annotationMeta
+     * @param string $type
+     * @return string
      */
-    protected function setClassNameForVarAnnotation(
+    protected function getClassNameForVarAnnotation(
         PropertyMeta $metaClass,
-        $parameter,
-        VarAnnotationMeta $annotationMeta
+        $type
     ) {
-        $className = $parameter;
+        $className = $type;
 
         if ($className[0] !== '\\' && $className !== 'array') {
             $declaringClass = $metaClass->getDeclaringClass();
-            $useStatement = $declaringClass->getUseStatement($parameter);
+            $useStatement = $declaringClass->getUseStatement($type);
             if ($useStatement !== false) {
                 $className = '\\' . $useStatement->getOriginal();
             } elseif ($declaringClass->isNamespaced()) {
@@ -318,6 +289,6 @@ class ReflectionService
             }
         }
 
-        $annotationMeta->setClassName($className);
+        return $className;
     }
 }

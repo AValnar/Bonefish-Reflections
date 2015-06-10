@@ -16,59 +16,36 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * @author     Alexander Schmidt <mail@story75.com>
  * @copyright  Copyright (c) 2015, Alexander Schmidt
- * @date       13.05.2015
+ * @date       10.06.2015
  */
 
-namespace Bonefish\Reflection\Meta;
+namespace Bonefish\Reflection\Factory;
 
+use AValnar\Doctrine\Factory\AnnotationReaderFactory;
+use Bonefish\Reflection\ReflectionService;
+use Doctrine\Common\Cache\ApcCache;
+use Nette\Caching\Cache;
 
-class AnnotationMeta
+class ReflectionServiceFactory
 {
     /**
-     * @var string
+     * Return an object with fully injected dependencies
+     *
+     * @param array $parameters
+     * @return mixed
      */
-    protected $name;
-
-    /**
-     * @var ParameterMeta
-     */
-    protected $parameter;
-
-    /**
-     * @return string
-     */
-    public function getName()
+    public function create(array $parameters = [])
     {
-        return $this->name;
+        if (isset($parameters['cache']) && $parameters['cache'] instanceof Cache) {
+            $cache = $parameters['cache'];
+        } else {
+            $cache = new ApcCache();
+        }
+
+        $annotationReaderFactory = new AnnotationReaderFactory();
+        $annotationReader = $annotationReaderFactory->create($parameters);
+
+        return new ReflectionService($cache, $annotationReader);
+
     }
-
-    /**
-     * @param string $name
-     * @return self
-     */
-    public function setName($name)
-    {
-        $this->name = $name;
-        return $this;
-    }
-
-    /**
-     * @return ParameterMeta
-     */
-    public function getParameter()
-    {
-        return $this->parameter;
-    }
-
-    /**
-     * @param ParameterMeta $parameter
-     * @return self
-     */
-    public function setParameter(ParameterMeta $parameter)
-    {
-        $this->parameter = $parameter;
-        return $this;
-    }
-
-
-} 
+}
