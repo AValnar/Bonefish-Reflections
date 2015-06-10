@@ -130,7 +130,7 @@ class ReflectionService
         }
 
         $annotations = $this->annotationReader->getClassAnnotations($reflection);
-        $this->createAnnotationMeta($classMeta, $annotations);
+        $this->createAnnotationMeta($classMeta, ...$annotations);
 
         $this->createUseMeta($reflection, $classMeta);
         $this->createPropertyMeta($reflection, $classMeta);
@@ -204,7 +204,7 @@ class ReflectionService
                 $annotations[] = new Variable($this->getClassNameForVarAnnotation($property, $varAnnotation));
             }
 
-            $this->createAnnotationMeta($property, $annotations);
+            $this->createAnnotationMeta($property, ...$annotations);
             $classMeta->addProperty($property);
         }
     }
@@ -233,7 +233,7 @@ class ReflectionService
             $this->createParameterMeta($methodReflection->getParameters(), $method);
 
             $annotations = $this->annotationReader->getMethodAnnotations($methodReflection);
-            $this->createAnnotationMeta($method, $annotations);
+            $this->createAnnotationMeta($method, ...$annotations);
 
             $classMeta->addMethod($method);
         }
@@ -279,7 +279,9 @@ class ReflectionService
     ) {
         $className = $type;
 
-        if ($className[0] !== '\\' && $className !== 'array') {
+        $defaultTypes = ['array', 'string', 'bool', 'boolean', 'int', 'integer', 'mixed', 'object'];
+
+        if ($className[0] !== '\\' && !in_array($className, $defaultTypes)) {
             $declaringClass = $metaClass->getDeclaringClass();
             $useStatement = $declaringClass->getUseStatement($type);
             if ($useStatement !== false) {

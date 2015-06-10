@@ -32,7 +32,7 @@ class ReflectionServiceFactory
      * Return an object with fully injected dependencies
      *
      * @param array $parameters
-     * @return mixed
+     * @return ReflectionService
      */
     public function create(array $parameters = [])
     {
