@@ -281,14 +281,17 @@ class ReflectionService
 
         $defaultTypes = ['array', 'string', 'bool', 'boolean', 'int', 'integer', 'mixed', 'object'];
 
-        if ($className[0] !== '\\' && !in_array($className, $defaultTypes)) {
-            $declaringClass = $metaClass->getDeclaringClass();
-            $useStatement = $declaringClass->getUseStatement($type);
-            if ($useStatement !== false) {
-                $className = '\\' . $useStatement->getOriginal();
-            } elseif ($declaringClass->isNamespaced()) {
-                $className = '\\' . $declaringClass->getNamespace() . '\\' . $className;
-            }
+        if ($className[0] === '\\' || in_array($className, $defaultTypes)) {
+            return $className;
+        }
+
+        $declaringClass = $metaClass->getDeclaringClass();
+        $useStatement = $declaringClass->getUseStatement($type);
+
+        if ($useStatement !== false) {
+            return '\\' . $useStatement->getOriginal();
+        } elseif ($declaringClass->isNamespaced()) {
+            return '\\' . $declaringClass->getNamespace() . '\\' . $className;
         }
 
         return $className;
