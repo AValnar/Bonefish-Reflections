@@ -16,51 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * @author     Alexander Schmidt <mail@story75.com>
  * @copyright  Copyright (c) 2015, Alexander Schmidt
- * @date       13.05.2015
+ * @date       18.08.2015
  */
-
 namespace Bonefish\Reflection;
-
 
 use Bonefish\Reflection\Meta\ClassMeta;
 
-final class ClassNameResolver implements ClassNameResolverInterface
+interface ClassNameResolverInterface
 {
-    /**
-     * @var array
-     */
-    protected $interfaceImplementations = [];
-
     /**
      * @param string $className
      * @param ClassMeta $reflector
      * @return string
      */
-    public function resolveClassName($className, ClassMeta $reflector = NULL)
-    {
-        // Check for fully qualified
-        if ($className[0] === '\\') {
-            return $className;
-        }
-
-        // Add \ if no reflector given since we don't care then
-        if ($reflector === NULL) {
-            return '\\' . $className;
-        }
-
-        // Check if reflector has use statement for class
-        $useStatement = $reflector->getUseStatement($className);
-        if ($useStatement !== FALSE) {
-            return '\\' . $useStatement->getOriginal();
-        }
-
-        // Check if reflector is namespaced
-        if ($reflector->isNamespaced())
-        {
-            return '\\' . $reflector->getNamespace() . '\\' . $className;
-        }
-
-        return $className;
-    }
-
-} 
+    public function resolveClassName($className, ClassMeta $reflector = null);
+}
