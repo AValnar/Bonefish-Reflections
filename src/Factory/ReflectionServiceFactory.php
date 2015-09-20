@@ -24,7 +24,7 @@ namespace Bonefish\Reflection\Factory;
 use AValnar\Doctrine\Factory\AnnotationReaderFactory;
 use Bonefish\Reflection\ReflectionService;
 use Doctrine\Common\Cache\ApcCache;
-use Nette\Caching\Cache;
+use Doctrine\Common\Cache\Cache;
 
 class ReflectionServiceFactory
 {
