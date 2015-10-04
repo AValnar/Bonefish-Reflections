@@ -112,7 +112,7 @@ class ReflectionService
 
         $reflection = $this->getClassReflection($className);
 
-        $classMeta->setName($className);
+        $classMeta->setName($reflection->getName());
         $classMeta->setShortName($reflection->getShortName());
         $classMeta->setInterface($reflection->isInterface());
         $classMeta->setDocComment($reflection->getDocComment());
@@ -121,7 +121,7 @@ class ReflectionService
         $parentClass = $reflection->getParentClass() === null ? null : $this->getClassMetaReflection($reflection->getParentClass()->getName());
         $classMeta->setParentClass($parentClass);
 
-        foreach($reflection->getInterfaceNames() as $interface) {
+        foreach ($reflection->getInterfaceNames() as $interface) {
             $classMeta->addInterface($this->getClassMetaReflection($interface));
         }
 
@@ -158,7 +158,9 @@ class ReflectionService
      */
     protected function createUseMeta(ClassType $reflection, ClassMeta $classMeta)
     {
-        if (!$reflection->getFileName()) return;
+        if (!$reflection->getFileName()) {
+            return;
+        }
 
         $parsedPHP = AnnotationsParser::parsePhp(file_get_contents($reflection->getFileName()));
 

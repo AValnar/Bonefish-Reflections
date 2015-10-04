@@ -42,7 +42,7 @@ trait NameableTrait
      */
     public function setName($name)
     {
-        $this->name = $name;
+        $this->name = ltrim($name, '\\');
         return $this;
     }
 } 
